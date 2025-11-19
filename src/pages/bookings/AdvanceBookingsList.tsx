@@ -153,6 +153,46 @@ const AdvanceBookingsList = () => {
 
     setProcessing(true);
     try {
+      const booking = bookModal.booking;
+
+      // For each selected room, create a check-in
+      for (const roomId of selectedRooms) {
+        const room = availableRooms.find(r => r.id === roomId);
+        if (!room) continue;
+
+        // Create check-in record
+        const checkinRef = await addDoc(collection(db, 'checkins'), {
+          guestName: booking.name,
+          phoneNumber: booking.mobile,
+          idNumber: booking.aadhar,
+          numberOfGuests: 1,
+          acType: booking.room_type,
+          rent: booking.price_per_room,
+          initialPayment: booking.advance_amount / selectedRooms.length,
+          paymentMode: booking.payment_mode || 'cash',
+          roomId: room.id,
+          roomNumber: room.roomNumber,
+          isCheckedOut: false,
+          checkedInAt: Timestamp.now(),
+          advanceBookingId: booking.id
+        });
+
+        // Add initial payment entry
+        await addDoc(collection(db, 'checkins', checkinRef.id, 'payments'), {
+          amount: booking.advance_amount / selectedRooms.length,
+          mode: booking.payment_mode || 'cash',
+          type: 'initial',
+          timestamp: Timestamp.now(),
+          description: 'Initial payment from advance booking'
+        });
+
+        // Update room status to occupied
+        await updateDoc(doc(db, 'rooms', room.id), {
+          status: 'occupied'
+        });
+      }
+
+      // Update advance booking status
       const roomDetails = selectedRooms.map(roomId => {
         const room = availableRooms.find(r => r.id === roomId);
         return {
@@ -161,19 +201,19 @@ const AdvanceBookingsList = () => {
         };
       });
 
-      await updateDoc(doc(db, 'advance_bookings', bookModal.booking.id), {
+      await updateDoc(doc(db, 'advance_bookings', booking.id), {
         status: 'completed',
         rooms: roomDetails,
         completed_at: Timestamp.now()
       });
 
-      toast.success('Rooms assigned successfully!');
+      toast.success('Check-in completed successfully!');
       setBookModal({ show: false, booking: null });
       setSelectedRooms([]);
       fetchBookings();
     } catch (error) {
       console.error('Error confirming booking:', error);
-      toast.error('Failed to confirm booking');
+      toast.error('Failed to complete check-in');
     } finally {
       setProcessing(false);
     }

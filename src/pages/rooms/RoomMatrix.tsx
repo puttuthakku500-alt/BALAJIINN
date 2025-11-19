@@ -80,8 +80,15 @@ const RoomMatrix = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(checkTimedRooms, 60000); // Check every minute
-    return () => clearInterval(interval);
+    // Refresh room data every 30 seconds to prevent stale state
+    const refreshInterval = setInterval(() => {
+      fetchData();
+    }, 30000);
+    const checkInterval = setInterval(checkTimedRooms, 60000); // Check every minute
+    return () => {
+      clearInterval(refreshInterval);
+      clearInterval(checkInterval);
+    };
   }, []);
 
   useEffect(() => {

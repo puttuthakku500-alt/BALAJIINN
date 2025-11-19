@@ -16,7 +16,7 @@ import EditRoom from './pages/rooms/EditRoom';
 import CheckIn from './pages/bookings/CheckIn';
 import Inventory from './pages/inventory/Inventory';
 import AddInventory from './pages/inventory/AddInventory';
-import PaymentLogs from './pages/payments/PaymentsPage';
+import PaymentLogs from './pages/payments/NewPaymentsPage';
 import Shop from './pages/shop/Shop';
 import BookedRooms from './pages/bookings/BookedRooms';
 import AdvanceBooking from './pages/bookings/AdvanceBooking';
