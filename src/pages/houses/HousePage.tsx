@@ -106,7 +106,7 @@ const HousePage = () => {
     try {
       const [activeBookingsSnapshot, historicalSnapshot] = await Promise.all([
         getDocs(query(collection(db, 'house_bookings'), where('isCheckedOut', '==', false))),
-        getDocs(query(collection(db, 'house_bookings'), where('isCheckedOut', '==', true), orderBy('checkedInAt', 'desc')))
+        getDocs(query(collection(db, 'house_bookings'), where('isCheckedOut', '==', true)))
       ]);
 
       const activeList = activeBookingsSnapshot.docs.map(doc => ({
@@ -118,6 +118,12 @@ const HousePage = () => {
         id: doc.id,
         ...doc.data()
       })) as HouseBooking[];
+
+      historicalList.sort((a, b) => {
+        const aTime = a.checkedInAt?.toDate?.() || new Date(0);
+        const bTime = b.checkedInAt?.toDate?.() || new Date(0);
+        return bTime.getTime() - aTime.getTime();
+      });
 
       setBookings(activeList);
       setHistoricalBookings(historicalList);
