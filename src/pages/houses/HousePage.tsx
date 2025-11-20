@@ -149,15 +149,22 @@ const HousePage = () => {
       setSelectedHouse(house);
       setCheckInModal(true);
     } else if (booking) {
-      setSelectedBooking(booking);
-      await fetchPaymentHistory(booking.id);
+      try {
+        await fetchPaymentHistory(booking.id);
+        setSelectedBooking(booking);
+      } catch (error) {
+        console.error('Error loading booking details:', error);
+        toast.error('Failed to load booking details');
+      }
     }
   };
 
   const fetchPaymentHistory = async (bookingId: string) => {
     try {
       const booking = bookings.find(b => b.id === bookingId) || historicalBookings.find(b => b.id === bookingId);
-      if (!booking) return;
+      if (!booking) {
+        throw new Error('Booking not found');
+      }
 
       const paymentRef = collection(db, 'house_bookings', bookingId, 'payments');
       const q = query(paymentRef, orderBy('timestamp', 'asc'));
@@ -179,7 +186,7 @@ const HousePage = () => {
       setPaymentHistory(fullHistory);
     } catch (error) {
       console.error('Error fetching payment history:', error);
-      toast.error('Failed to load payment history');
+      throw error;
     }
   };
 
