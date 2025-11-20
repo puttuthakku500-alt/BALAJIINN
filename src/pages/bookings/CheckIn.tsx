@@ -26,21 +26,24 @@ const CheckIn: React.FC = () => {
     phoneNumber: '',
     idNumber: '',
     numberOfGuests: 1,
-    acType: 'NON AC',
+    acType: 'NON AC' as 'NON AC' | 'AC',
     rent: '',
     initialPayment: '',
     paymentMode: 'cash' as 'cash' | 'gpay'
   });
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    const processedValue = ['guestName', 'idNumber'].includes(name) ? value.toUpperCase() : value;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'numberOfGuests' ? parseInt(value) : value,
+      [name]: name === 'numberOfGuests' ? parseInt(value) : processedValue,
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (
@@ -54,6 +57,11 @@ const CheckIn: React.FC = () => {
       return;
     }
 
+    setConfirmModal(true);
+  };
+
+  const confirmCheckIn = async () => {
+    setProcessing(true);
     try {
       const checkinRef = await addDoc(collection(db, 'checkins'), {
         ...formData,
@@ -74,11 +82,13 @@ const CheckIn: React.FC = () => {
       });
 
       toast.success('Check-in completed successfully!');
-      // Navigate to the room matrix page instead of /roommatrix
       navigate('/rooms/matrix');
     } catch (error) {
       console.error('Error during check-in:', error);
       toast.error('Check-in failed. Please try again.');
+    } finally {
+      setProcessing(false);
+      setConfirmModal(false);
     }
   };
 
@@ -97,7 +107,7 @@ const CheckIn: React.FC = () => {
               name="guestName"
               value={formData.guestName}
               onChange={handleChange}
-              className="w-full rounded-md border-gray-300 shadow-sm"
+              className="w-full rounded-md border-gray-300 shadow-sm uppercase"
               placeholder="Enter guest name"
               required
             />
@@ -113,6 +123,7 @@ const CheckIn: React.FC = () => {
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
+              onWheel={(e) => e.currentTarget.blur()}
               className="w-full rounded-md border-gray-300 shadow-sm"
               placeholder="Enter phone number"
               required
@@ -129,7 +140,7 @@ const CheckIn: React.FC = () => {
               name="idNumber"
               value={formData.idNumber}
               onChange={handleChange}
-              className="w-full rounded-md border-gray-300 shadow-sm"
+              className="w-full rounded-md border-gray-300 shadow-sm uppercase"
               placeholder="Enter ID number"
               required
             />
@@ -146,24 +157,40 @@ const CheckIn: React.FC = () => {
               min="1"
               value={formData.numberOfGuests}
               onChange={handleChange}
+              onWheel={(e) => e.currentTarget.blur()}
               className="w-full rounded-md border-gray-300 shadow-sm"
             />
           </div>
 
           {/* AC or NON AC */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Room Type
             </label>
-            <select
-              name="acType"
-              value={formData.acType}
-              onChange={handleChange}
-              className="w-full rounded-md border-gray-300 shadow-sm"
-            >
-              <option value="NON AC">NON AC</option>
-              <option value="AC">AC</option>
-            </select>
+            <div className="flex gap-4">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="acType"
+                  value="NON AC"
+                  checked={formData.acType === 'NON AC'}
+                  onChange={handleChange}
+                  className="form-radio h-4 w-4 text-blue-600"
+                />
+                <span className="ml-2">NON AC</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="acType"
+                  value="AC"
+                  checked={formData.acType === 'AC'}
+                  onChange={handleChange}
+                  className="form-radio h-4 w-4 text-blue-600"
+                />
+                <span className="ml-2">AC</span>
+              </label>
+            </div>
           </div>
 
           {/* Rent of the Room */}
@@ -176,6 +203,7 @@ const CheckIn: React.FC = () => {
               name="rent"
               value={formData.rent}
               onChange={handleChange}
+              onWheel={(e) => e.currentTarget.blur()}
               className="w-full rounded-md border-gray-300 shadow-sm"
               placeholder="Enter rent amount"
               required
@@ -192,6 +220,7 @@ const CheckIn: React.FC = () => {
               name="initialPayment"
               value={formData.initialPayment}
               onChange={handleChange}
+              onWheel={(e) => e.currentTarget.blur()}
               className="w-full rounded-md border-gray-300 shadow-sm"
               placeholder="Enter initial payment amount"
               required
@@ -246,6 +275,78 @@ const CheckIn: React.FC = () => {
           </div>
         </form>
       </div>
+
+      {confirmModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h2 className="text-xl font-bold mb-4">Confirm Check-In</h2>
+            <p className="text-sm text-gray-600 mb-4">Please review the details before confirming:</p>
+
+            <div className="space-y-2 mb-6 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Guest Name:</span>
+                <span className="font-medium">{formData.guestName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Phone Number:</span>
+                <span className="font-medium">{formData.phoneNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">ID Number:</span>
+                <span className="font-medium">{formData.idNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Number of Guests:</span>
+                <span className="font-medium">{formData.numberOfGuests}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Room Type:</span>
+                <span className="font-medium">{formData.acType}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Rent:</span>
+                <span className="font-medium">₹{parseFloat(formData.rent).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Initial Payment:</span>
+                <span className="font-medium">₹{parseFloat(formData.initialPayment).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Payment Mode:</span>
+                <span className="font-medium capitalize">{formData.paymentMode}</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t">
+                <span className="text-gray-700 font-medium">Pending Amount:</span>
+                <span className="font-bold text-red-600">₹{(parseFloat(formData.rent) - parseFloat(formData.initialPayment)).toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setConfirmModal(false)}
+                disabled={processing}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmCheckIn}
+                disabled={processing}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center"
+              >
+                {processing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                    Processing...
+                  </>
+                ) : (
+                  'Confirm Check-In'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

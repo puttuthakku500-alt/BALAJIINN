@@ -68,7 +68,6 @@ const RoomMatrix = () => {
   const [shopPurchases, setShopPurchases] = useState<ShopPurchase[]>([]);
   const [loading, setLoading] = useState(true);
   const [floors, setFloors] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'payments' | 'purchases'>('payments');
   const [extensionModal, setExtensionModal] = useState(false);
   const [extensionAmount, setExtensionAmount] = useState('');
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
@@ -607,7 +606,6 @@ const RoomMatrix = () => {
                 setSelectedBooking(null);
                 setPaymentHistory([]);
                 setShopPurchases([]);
-                setActiveTab('payments');
               }}
               className="px-3 py-1 bg-gray-300 text-black rounded hover:bg-gray-400"
             >
@@ -616,174 +614,79 @@ const RoomMatrix = () => {
           </div>
 
           <div className="mt-6">
-            <div className="border-b border-gray-200">
-              <nav className="-mb-px flex">
-                <button
-                  onClick={() => setActiveTab('payments')}
-                  className={`py-2 px-4 text-sm font-medium ${
-                    activeTab === 'payments'
-                      ? 'border-b-2 border-blue-500 text-blue-600'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Payment History
-                </button>
-                <button
-                  onClick={() => setActiveTab('purchases')}
-                  className={`py-2 px-4 text-sm font-medium flex items-center ${
-                    activeTab === 'purchases'
-                      ? 'border-b-2 border-blue-500 text-blue-600'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Shop Purchases
-                  {shopPurchases.length > 0 && (
-                    <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs">
-                      {shopPurchases.length}
-                    </span>
+            <h3 className="font-bold mb-2">Transaction History</h3>
+            <div className="overflow-auto max-h-64 border rounded">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="p-2 text-left">Date</th>
+                    <th className="p-2 text-left">Time</th>
+                    <th className="p-2 text-left">Process</th>
+                    <th className="p-2 text-left">Cash</th>
+                    <th className="p-2 text-left">Gpay</th>
+                    <th className="p-2 text-left">Rent</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paymentHistory.map((entry, i) => {
+                    const dt = entry.timestamp?.toDate?.();
+                    const date = dt ? new Date(dt).toLocaleDateString('en-IN') : '—';
+                    const time = dt ? new Date(dt).toLocaleTimeString('en-IN', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) : '—';
+
+                    let process = '';
+                    let rentAmount = null;
+                    let cashAmount = null;
+                    let gpayAmount = null;
+
+                    switch (entry.type) {
+                      case 'Rent (Check-in)':
+                        process = 'Check-in';
+                        rentAmount = entry.amount;
+                        break;
+                      case 'extension':
+                        process = 'Extension';
+                        rentAmount = entry.amount;
+                        break;
+                      case 'initial':
+                        process = 'Initial Payment';
+                        if (entry.mode === 'cash') cashAmount = entry.amount;
+                        if (entry.mode === 'gpay') gpayAmount = entry.amount;
+                        break;
+                      case 'advance':
+                        process = 'Additional Payment';
+                        if (entry.mode === 'cash') cashAmount = entry.amount;
+                        if (entry.mode === 'gpay') gpayAmount = entry.amount;
+                        break;
+                      case 'shop-purchase':
+                        process = 'Shop Purchase';
+                        rentAmount = Math.abs(entry.amount);
+                        break;
+                    }
+
+                    return (
+                      <tr key={i} className="border-t">
+                        <td className="p-2">{date}</td>
+                        <td className="p-2">{time}</td>
+                        <td className="p-2">{process}</td>
+                        <td className="p-2">{cashAmount ? `₹${cashAmount.toFixed(2)}` : '—'}</td>
+                        <td className="p-2">{gpayAmount ? `₹${gpayAmount.toFixed(2)}` : '—'}</td>
+                        <td className="p-2">{rentAmount ? `₹${rentAmount.toFixed(2)}` : '—'}</td>
+                      </tr>
+                    );
+                  })}
+                  {paymentHistory.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="p-2 text-center text-gray-500">
+                        No transaction history found.
+                      </td>
+                    </tr>
                   )}
-                </button>
-              </nav>
+                </tbody>
+              </table>
             </div>
-
-            {activeTab === 'payments' && (
-              <div className="mt-4">
-                <h3 className="font-bold mb-2">Transaction History</h3>
-                <div className="overflow-auto max-h-64 border rounded">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="p-2 text-left">Date</th>
-                        <th className="p-2 text-left">Time</th>
-                        <th className="p-2 text-left">Process</th>
-                        <th className="p-2 text-left">Cash</th>
-                        <th className="p-2 text-left">Gpay</th>
-                        <th className="p-2 text-left">Rent</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paymentHistory.map((entry, i) => {
-                        const dt = entry.timestamp?.toDate?.();
-                        const date = dt ? new Date(dt).toLocaleDateString('en-IN') : '—';
-                        const time = dt ? new Date(dt).toLocaleTimeString('en-IN', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        }) : '—';
-                        
-                        let process = '';
-                        let rentAmount = null;
-                        let cashAmount = null;
-                        let gpayAmount = null;
-
-                        switch (entry.type) {
-                          case 'Rent (Check-in)':
-                            process = 'Check-in';
-                            rentAmount = entry.amount;
-                            break;
-                          case 'extension':
-                            process = 'Extension';
-                            rentAmount = entry.amount;
-                            break;
-                          case 'initial':
-                            process = 'Initial Payment';
-                            if (entry.mode === 'cash') cashAmount = entry.amount;
-                            if (entry.mode === 'gpay') gpayAmount = entry.amount;
-                            break;
-                          case 'advance':
-                            process = 'Additional Payment';
-                            if (entry.mode === 'cash') cashAmount = entry.amount;
-                            if (entry.mode === 'gpay') gpayAmount = entry.amount;
-                            break;
-                          case 'shop-purchase':
-                            process = 'Shop Purchase';
-                            rentAmount = Math.abs(entry.amount);
-                            break;
-                        }
-
-                        return (
-                          <tr key={i} className="border-t">
-                            <td className="p-2">{date}</td>
-                            <td className="p-2">{time}</td>
-                            <td className="p-2">{process}</td>
-                            <td className="p-2">{cashAmount ? `₹${cashAmount.toFixed(2)}` : '—'}</td>
-                            <td className="p-2">{gpayAmount ? `₹${gpayAmount.toFixed(2)}` : '—'}</td>
-                            <td className="p-2">{rentAmount ? `₹${rentAmount.toFixed(2)}` : '—'}</td>
-                          </tr>
-                        );
-                      })}
-                      {paymentHistory.length === 0 && (
-                        <tr>
-                          <td colSpan={6} className="p-2 text-center text-gray-500">
-                            No payment history found.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'purchases' && (
-              <div className="mt-4">
-                <h3 className="font-bold mb-2">Shop Purchases</h3>
-                <div className="overflow-auto max-h-64 border rounded">
-                  <table className="min-w-full text-sm">
-                    <thead className="bg-gray-200">
-                      <tr>
-                        <th className="p-2 text-left">Date</th>
-                        <th className="p-2 text-left">Item</th>
-                        <th className="p-2 text-left">Quantity</th>
-                        <th className="p-2 text-left">Price</th>
-                        <th className="p-2 text-left">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {shopPurchases.map((purchase, i) => {
-                        const dt = purchase.createdAt?.toDate?.();
-                        const date = dt ? new Date(dt).toLocaleDateString('en-IN') : '—';
-                        
-                        return (
-                          <tr key={i} className="border-t">
-                            <td className="p-2">{date}</td>
-                            <td className="p-2 font-medium">{purchase.itemName}</td>
-                            <td className="p-2">{purchase.quantity}</td>
-                            <td className="p-2">₹{purchase.amount.toFixed(2)}</td>
-                            <td className="p-2">
-                              <span className={`px-2 py-0.5 rounded-full text-xs ${
-                                purchase.paymentStatus === 'pending' 
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-green-100 text-green-800'
-                              }`}>
-                                {purchase.paymentStatus}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {shopPurchases.length === 0 && (
-                        <tr>
-                          <td colSpan={5} className="p-2 text-center text-gray-500">
-                            <div className="flex flex-col items-center py-4">
-                              <ShoppingBag className="h-8 w-8 text-gray-400 mb-2" />
-                              <p>No shop purchases found</p>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                {shopPurchases.length > 0 && (
-                  <div className="mt-3 flex justify-end">
-                    <div className="bg-gray-100 px-4 py-2 rounded text-sm">
-                      <span className="font-medium">Total Shop Purchases:</span>
-                      <span className="ml-2 font-bold">₹{getTotalShopPurchases.toFixed(2)}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       )}
