@@ -17,15 +17,14 @@ import { getStorage } from 'firebase/storage';
 //TESTING
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAIxrA5uo64FQOq_RP1GnG8sNhhXJBaX2E",
-  authDomain: "boss-test-3d2f8.firebaseapp.com",
-  projectId: "boss-test-3d2f8",
-  storageBucket: "boss-test-3d2f8.firebasestorage.app",
-  messagingSenderId: "820395646920",
-  appId: "1:820395646920:web:38b8361365c00c74ce2afd",
-  measurementId: "G-HHBR54NKFM"
+  apiKey: "AIzaSyA-pRxNph8ECQEi2IzUWgPAq06fi-3wKK8",
+  authDomain: "bossinn-7fbb9.firebaseapp.com",
+  projectId: "bossinn-7fbb9",
+  storageBucket: "bossinn-7fbb9.firebasestorage.app",
+  messagingSenderId: "138358328390",
+  appId: "1:138358328390:web:e04ab1e548d7c56e5fce47",
+  measurementId: "G-8KRR5T7YJQ"
 };
-
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
