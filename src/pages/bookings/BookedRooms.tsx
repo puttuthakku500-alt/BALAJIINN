@@ -468,7 +468,7 @@ const BookedRooms: React.FC = () => {
                     <span className="text-gray-600">Total Rent:</span>
                     <span className="font-medium">₹{(() => {
                       // let totalRent = selectedCustomer.rent;
-                      let totalRent = PaymentEntry.type;
+                      let totalRent = Customer.rent;
                       paymentHistory.forEach(p => {
                         if (p.type === 'extension' || p.type === 'extra-fee' || p.type === 'shop-purchase') {
                           totalRent += Math.abs(p.amount);
