@@ -705,7 +705,7 @@ const RoomMatrix = () => {
         </div>
       )}
 
-      {loading ? (
+      {/* {loading ? (
         <div className="text-center py-6">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading rooms...</p>
@@ -772,9 +772,7 @@ const RoomMatrix = () => {
                           </div>
                           {pendingAmounts[booking.id] > 0 && (
                             <div className="mt-1 text-xs font-semibold text-red-600">
-                              {/* Pending: ₹{Math.max(0, pendingAmounts[booking.id])}*/}
-                              <strong>Pending:</strong> ₹{Math.max(0, getTotalRentSoFar(pendingAmounts[booking.id]) - getTotalPaidSoFar(pendingAmounts[booking.id]))}
-
+                              Pending: ₹{Math.max(0, pendingAmounts[booking.id])}
                             </div>
                           )}
                         </>
@@ -813,7 +811,126 @@ const RoomMatrix = () => {
           );
         })
       )}
-      
+       */}
+
+      // ... (first part of your file remains exactly the same up to the rendering of floors)
+{loading ? (
+  <div className="text-center py-6">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+    <p className="mt-2 text-gray-600">Loading rooms...</p>
+  </div>
+) : (
+  floors.map(floor => {
+    const floorRooms = rooms.filter(room => room.floor === floor);
+    return (
+      <div key={floor} className="mb-6">
+        <h2 className="text-xl font-semibold mb-3">Floor {floor}</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {floorRooms.map(room => {
+            const booking = getBookingByRoomId(room.id);
+
+            // ====== NEW: compute displayedPending so it matches the selected booking view when selected ======
+            const displayedPending = booking
+              ? (selectedBooking && selectedBooking.id === booking.id
+                  ? Math.max(0, getTotalRentSoFar(selectedBooking) - getTotalPaidSoFar(selectedBooking))
+                  : (pendingAmounts[booking.id] || 0))
+              : 0;
+            // ================================================================================================
+
+            return (
+              <motion.div
+                key={room.id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={async () => {
+                  if (room.status === 'occupied') {
+                    const booking = getBookingByRoomId(room.id);
+                    if (booking) {
+                      setSelectedBooking(booking);
+                      fetchPaymentHistory(booking.id);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  } else if (room.status === 'extension') {
+                    const booking = getBookingByRoomId(room.id);
+                    if (booking) {
+                      setCurrentRoom(room);
+                      setCurrentBooking(booking);
+                      setExtensionModal(true);
+                    }
+                  } else if (room.status === 'available') {
+                    navigate(`/check-in/${room.id}`);
+                  } else if (room.status === 'cleaning') {
+                    setCleaningRoom(room);
+                    setCleaningConfirmModal(true);
+                  } else {
+                    navigate(`/rooms/edit/${room.id}`);
+                  }
+                }}
+                className={`relative p-4 rounded-lg shadow border text-center cursor-pointer ${
+                  room.status === 'occupied' 
+                    ? 'bg-red-100' 
+                    : room.status === 'extension'
+                      ? 'bg-purple-100'
+                      : 'bg-white'
+                }`}
+              >
+                <div className={`w-10 h-10 mx-auto ${getStatusColor(room.status)} rounded-full flex items-center justify-center mb-2`}>
+                  {getStatusIcon(room.status)}
+                </div>
+                <div className="font-bold text-lg">{room.roomNumber}</div>
+                <div className="text-xs uppercase">{room.type}</div>
+
+                {room.status === 'occupied' && booking && (
+                  <>
+                    <div className="mt-1 flex justify-center">
+                      <div className={`text-xs font-medium flex items-center ${getTimeRemainingColor(stayValidUntil[booking.id] || '')}`}>
+                        <Clock className="h-3 w-3 mr-1" />
+                        {stayValidUntil[booking.id] ? stayValidUntil[booking.id].split(',')[0] : '...'}
+                      </div>
+                    </div>
+                    {displayedPending > 0 && (
+                      <div className="mt-1 text-xs font-semibold text-red-600">
+                        Pending: ₹{Math.max(0, displayedPending)}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {room.status === 'occupied' && (
+                  <div className="absolute top-2 right-2">
+                    {(() => {
+                      const booking = getBookingByRoomId(room.id);
+                      if (booking && displayedPending > 0) {
+                        return (
+                          <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center"
+                               title={`Pending: ₹${displayedPending.toFixed(0)}`}>
+                            <span className="text-white text-xs">₹</span>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
+                )}
+                
+                {room.status === 'extension' && (
+                  <div className="absolute -top-1 -right-1">
+                    <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center animate-pulse" 
+                         title="Needs extension">
+                      <AlarmClock className="h-3 w-3 text-white" />
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  })
+)}
+// ... (rest of your file unchanged)
+
       {extensionModal && currentRoom && currentBooking && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <motion.div 
