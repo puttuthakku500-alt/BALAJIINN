@@ -772,7 +772,9 @@ const RoomMatrix = () => {
                           </div>
                           {pendingAmounts[booking.id] > 0 && (
                             <div className="mt-1 text-xs font-semibold text-red-600">
-                              Pending: ₹{Math.max(0, pendingAmounts[booking.id])}
+                              {/* Pending: ₹{Math.max(0, pendingAmounts[booking.id])}*/}
+                              <strong>Pending:</strong> ₹{Math.max(0, getTotalRentSoFar(selectedBooking) - getTotalPaidSoFar(selectedBooking))}
+
                             </div>
                           )}
                         </>
