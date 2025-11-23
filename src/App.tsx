@@ -34,12 +34,11 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           
-          {/* <Route path="/" element={
+          <Route path="/" element={
             <PrivateRoute>
               <DashboardLayout />
             </PrivateRoute>
-          }> */}
-          <Route>
+          }>
             <Route index element={<RoomMatrix />} />
             <Route path="rooms" element={<RoomList />} />
             <Route path="rooms/matrix" element={<RoomMatrix />} />
