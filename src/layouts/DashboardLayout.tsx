@@ -55,7 +55,7 @@ const DashboardLayout = () => {
   const navigation = [
     { name: 'Rooms', href: '/rooms', icon: BedDouble },
     { name: 'Room Matrix', href: '/rooms/matrix', icon: Grid3X3 },
-    { name: 'Houses', href: '/houses', icon: Home },
+    // { name: 'Houses', href: '/houses', icon: Home },
     { name: 'Booked Rooms', href: '/booked-rooms', icon: Users },
     { name: 'Advance Bookings', href: '/advance-bookings', icon: CalendarCheck },
     { name: 'Payments', href: '/payments', icon: Receipt },
