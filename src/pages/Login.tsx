@@ -32,7 +32,7 @@ const Login = () => {
         <div className="bg-white rounded-lg shadow-xl overflow-hidden">
           <div className="p-8">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-blue-900">BOSS INN</h1>
+              <h1 className="text-3xl font-bold text-blue-900">BALAJI INN</h1>
               <p className="text-gray-600 mt-2">Hotel Management Portal</p>
             </div>
             
