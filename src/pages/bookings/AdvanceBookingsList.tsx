@@ -114,8 +114,7 @@ const AdvanceBookingsList = () => {
 
       const availableRoomsList = allRooms.filter(room =>
         !occupiedRoomIds.has(room.id) &&
-        room.status === 'available' &&
-        room.type.toLowerCase() === booking.room_type.toLowerCase().replace(' ', '-')
+        room.status === 'available'
       );
 
       availableRoomsList.sort((a, b) => a.roomNumber - b.roomNumber);
@@ -599,6 +598,7 @@ const AdvanceBookingsList = () => {
                         >
                           <div className="text-2xl font-bold mb-1">{room.roomNumber}</div>
                           <div className="text-xs text-gray-600">Floor {room.floor}</div>
+                          <div className="text-xs text-gray-600 mt-1 capitalize">{room.type.replace('-', ' ')}</div>
                           {isSelected && (
                             <div className="mt-2 text-xs font-medium text-green-600">Selected</div>
                           )}
