@@ -36,7 +36,7 @@ function App() {
           
           <Route path="/" element={
             <PrivateRoute>
-              <RoomMatrix />
+              <DashboardLayout />
             </PrivateRoute>
           }>
             <Route index element={<RoomMatrix />} />
