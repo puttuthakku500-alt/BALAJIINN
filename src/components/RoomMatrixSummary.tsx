@@ -131,7 +131,7 @@ const RoomMatrixSummary = () => {
           <p className="text-xs text-gray-600 font-medium mt-1">TOTAL ROOMS</p>
         </div>
 
-        <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center">
+        {/* <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center">
           <div className="flex items-center justify-center mb-2">
             <Home className="h-6 w-6 text-green-600" />
           </div>
@@ -153,7 +153,7 @@ const RoomMatrixSummary = () => {
           </div>
           <p className="text-2xl font-bold text-gray-700">{summary.totalHouses}</p>
           <p className="text-xs text-gray-600 font-medium mt-1">TOTAL HOUSES</p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
