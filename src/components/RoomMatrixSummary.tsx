@@ -8,9 +8,9 @@ type SummaryData = {
   availableRooms: number;
   occupiedRooms: number;
   cleaningRooms: number;
-  totalHouses: number;
-  availableHouses: number;
-  bookedHouses: number;
+  // totalHouses: number;
+  // availableHouses: number;
+  // bookedHouses: number;
 };
 
 const RoomMatrixSummary = () => {
@@ -19,9 +19,9 @@ const RoomMatrixSummary = () => {
     availableRooms: 0,
     occupiedRooms: 0,
     cleaningRooms: 0,
-    totalHouses: 4,
-    availableHouses: 0,
-    bookedHouses: 0,
+    // totalHouses: 4,
+    // availableHouses: 0,
+    // bookedHouses: 0,
   });
   const [loading, setLoading] = useState(true);
 
