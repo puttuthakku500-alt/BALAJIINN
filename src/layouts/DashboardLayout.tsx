@@ -53,7 +53,7 @@ const DashboardLayout = () => {
   };
 
   const navigation = [
-    { name: 'Rooms', href: '/rooms', icon: BedDouble },
+    // { name: 'Rooms', href: '/rooms', icon: BedDouble },
     { name: 'Room Matrix', href: '/rooms/matrix', icon: Grid3X3 },
     // { name: 'Houses', href: '/houses', icon: Home },
     { name: 'Booked Rooms', href: '/booked-rooms', icon: Users },
